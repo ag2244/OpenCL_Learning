@@ -1,0 +1,10 @@
+*.opendb
+*.ipch
+*.iobj
+*.ipdb
+*.pdb
+*.db
+*.exe
+*.dll
+*.lib
+opencl_test/
