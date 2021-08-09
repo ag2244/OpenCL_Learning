@@ -72,8 +72,6 @@ int main()
 
 	for (i = 0; i < MEM_SIZE; i++) { mem_b[i] = i * -0.5; }
 
-	for (i = 0; i < MEM_SIZE; i++) { mem_result[i] = 0; }
-
 	//Get device info
 	ret = clGetPlatformIDs(1, &platform_id, &ret_num_platforms);
 	ret = clGetDeviceIDs(platform_id, CL_DEVICE_TYPE_DEFAULT, 1, &device_id, &ret_num_devices);
