@@ -95,27 +95,35 @@ int main()
 	//Build a program executable from program source (or binary)
 	ret = clBuildProgram(program, 1, &device_id, NULL, NULL, NULL);
 
-	kernel = clCreateKernel(program, "vecAdd", &ret);
+	for (int c = 0; c < 3; c++)
+	{
+		int c_arr[1]; c_arr[0] = c;
+		cl_mem memobj_testint = clCreateBuffer(context, CL_MEM_READ_WRITE, sizeof(int), NULL, &ret);
+		ret = clEnqueueWriteBuffer(command_queue, memobj_testint, CL_TRUE, 0, sizeof(int), c_arr, 0, NULL, NULL);
 
-	//Set argument value for a specific arguent of a kernel
+		kernel = clCreateKernel(program, "vecAdd", &ret);
 
-	ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void*)&memobj_corrections);
-	ret = clSetKernelArg(kernel, 1, sizeof(cl_mem), (void*)&memobj_pVals);
+		//Set argument value for a specific arguent of a kernel
 
-	//Define global size and local size
-	size_t global_work_size[2] = { MEM_SIZE, MEM_SIZE};
-	size_t local_work_size[2] = { MEM_SIZE/2, MEM_SIZE/2};
+		ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void*)&memobj_corrections);
+		ret = clSetKernelArg(kernel, 1, sizeof(cl_mem), (void*)&memobj_pVals);
+		ret = clSetKernelArg(kernel, 2, sizeof(cl_mem), (void*)&memobj_testint);
 
-	//Enqueue a command to execute a kernel on a device ("1" = 1 dimensional work)
-	ret = clEnqueueNDRangeKernel(command_queue, kernel, 2, NULL, global_work_size, local_work_size, 0, NULL, NULL);
+		//Define global size and local size
+		size_t global_work_size[2] = { MEM_SIZE, MEM_SIZE };
+		size_t local_work_size[2] = { MEM_SIZE / 2, MEM_SIZE / 2 };
 
-	//Copy memory from device to host
-	ret = clEnqueueReadBuffer(command_queue, memobj_corrections, CL_TRUE, 0, MEM_SIZE * sizeof(float), mem_corrections, 0, NULL, NULL);
+		//Enqueue a command to execute a kernel on a device ("1" = 1 dimensional work)
+		ret = clEnqueueNDRangeKernel(command_queue, kernel, 2, NULL, global_work_size, local_work_size, 0, NULL, NULL);
 
-	//Print out result
-	//for (i = 0; i < MEM_SIZE; i++) printf("Memory array mem[%d] : %.2f\n", i, mem_corrections[i]);
+		//Copy memory from device to host
+		ret = clEnqueueReadBuffer(command_queue, memobj_corrections, CL_TRUE, 0, MEM_SIZE * sizeof(float), mem_corrections, 0, NULL, NULL);
 
-	printf("\nopencl_test\n");
+		//Print out result
+		for (i = 0; i < MEM_SIZE; i++) printf("Memory array mem[%d] : %.2f\n", i, mem_corrections[i]);
+
+		printf("\nopencl_test\n");
+	}
 
 	//clFlush only guarantees that all queued commands to command_queue get issued to the appropriate device
 	//There is no guarantee that they will be complete after clFlush returns
